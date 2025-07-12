@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>تأكيد الحجز - منصة الملك</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background-color: #f5f5f5;
+      padding: 50px;
+      text-align: center;
+    }
+    .box {
+      background-color: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      display: inline-block;
+      max-width: 600px;
+    }
+    button {
+      background-color: #28a745;
+      color: white;
+      padding: 15px 25px;
+      font-size: 18px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    .done {
+      margin-top: 20px;
+      color: #155724;
+      background-color: #d4edda;
+      padding: 15px;
+      border-radius: 10px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="box">
+    <h2>تأكيد حجز الطالب</h2>
+    <p>بالضغط على الزر التالي، سيتم إرسال رسالة ترحيب للطالب تلقائيًا.</p>
+    <button onclick="sendConfirmation()">تأكيد الحجز الآن</button>
+    <div class="done" id="doneMessage">✅ تم إرسال الرسالة للطالب بنجاح!</div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    emailjs.init("hyymnwvweB3_SNl4b");
+
+    const query = new URLSearchParams(window.location.search);
+    const studentData = {
+      name: query.get("name"),
+      phone: query.get("phone"),
+      parentPhone: query.get("parentPhone"),
+      stage: query.get("stage"),
+      grade: query.get("grade"),
+      address: query.get("address"),
+      lessonType: query.get("lessonType")
+    };
+
+    function sendConfirmation() {
+      // تحديد السعر حسب المرحلة
+      let price = "";
+      if (studentData.stage === "ابتدائي") price = "90 جنيه";
+      else if (studentData.stage === "اعدادي") price = "130 جنيه";
+      else if (studentData.stage === "ثانوي") price = "180 جنيه";
+      else price = "غير محدد";
+
+      // تحديد المكان حسب العنوان ونوع الحضور
+      let place = "";
+      if (studentData.lessonType === "سنتر") {
+        if (studentData.address === "الشمارقة") {
+          place = "بجوار درس الأستاذ محمد عبد المنصف";
+        } else if (studentData.address === "كفر دخميس") {
+          place = "بمنزل الحاج صلاح عبد الباقي";
+        } else if (studentData.address === "القنطرة البيضاء") {
+          place = "سنتر الفردوس، بجوار مسجد الفردوس";
+        } else {
+          place = "سيتم التواصل معك لتحديد المكان";
+        }
+      } else {
+        place = "سيتم التواصل معك لتحديد مكان الحصة حسب نوع الحضور.";
+      }
+
+      const message = `
+📚 أهلًا بك في عائلة الأستاذ مصطفى نوفل التعليمية!
+
+👦 الطالب: ${studentData.name}
+📍 مكان الحصة: ${place}
+💰 سعر الشهر: ${price}
+
+🕰️ ميعاد أول حصة سيتم تحديده خلال ساعات.
+
+🌟 مستنيك يا بطل عشان تشوف قد إيه الأستاذ مصطفى هيبقى فخور بيك!
+
+#منصة_الملك #الدراسات_مع_الملك
+      `;
+
+      emailjs.send("service_72gvpgv", "template_47fjr9j", {
+        name: studentData.name,
+        phone: studentData.phone,
+        message: message
+      }).then(function() {
+        document.getElementById("doneMessage").style.display = "block";
+      }, function(error) {
+        alert("❌ حصل خطأ أثناء إرسال الرسالة.");
+        console.error("EmailJS Error:", error);
+      });
+    }
+  </script>
+</body>
+</html>
